@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}Juros{% endblock %}
+{% block conteudo %}
+<h1>Calculadora de juros</h1>
+<form method="post" class="formulario" data-testid="form-juros">
+  <label>Tipo
+    <select name="tipo" data-testid="campo-tipo">
+      <option value="simples" {{ 'selected' if dados.get('tipo') == 'simples' }}>Juros simples</option>
+      <option value="compostos" {{ 'selected' if dados.get('tipo') == 'compostos' }}>Juros compostos</option>
+    </select>
+  </label>
+  <label>Capital (R$)
+    <input name="capital" inputmode="decimal" value="{{ dados.get('capital', '') }}" data-testid="campo-capital">
+  </label>
+  <label>Taxa (% ao período)
+    <input name="taxa" inputmode="decimal" value="{{ dados.get('taxa', '') }}" data-testid="campo-taxa">
+  </label>
+  <label>Períodos
+    <input name="periodos" inputmode="numeric" value="{{ dados.get('periodos', '') }}" data-testid="campo-periodos">
+  </label>
+  <div class="acoes"><button type="submit" data-testid="botao-calcular">Calcular</button></div>
+</form>
+
+{% if resultado %}
+<section class="resultado" data-testid="resultado-juros">
+  <div class="numeros">
+    <div><span>Capital</span><strong>{{ resultado.capital | moeda }}</strong></div>
+    <div><span>Juros</span><strong data-testid="valor-juros">{{ resultado.juros | moeda }}</strong></div>
+    <div><span>Montante</span><strong data-testid="valor-montante">{{ resultado.montante | moeda }}</strong></div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

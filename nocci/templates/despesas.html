@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block titulo %}Despesas{% endblock %}
+{% block conteudo %}
+<h1>Controle de despesas</h1>
+
+<form method="post" action="{{ url_for('pagina_despesas', ano=ano, mes=mes, orcamento=orcamento_informado or None) }}" class="formulario" data-testid="form-despesa">
+  <label>Descrição
+    <input name="descricao" value="{{ dados.get('descricao', '') }}" data-testid="campo-descricao">
+  </label>
+  <label>Valor (R$)
+    <input name="valor" inputmode="decimal" value="{{ dados.get('valor', '') }}" data-testid="campo-valor">
+  </label>
+  <label>Categoria
+    <select name="categoria" data-testid="campo-categoria">
+      {% for c in categorias %}<option {{ 'selected' if dados.get('categoria') == c }}>{{ c }}</option>{% endfor %}
+    </select>
+  </label>
+  <label>Data
+    <input name="data" type="date" value="{{ dados.get('data', hoje) }}" data-testid="campo-data">
+  </label>
+  <div class="acoes"><button type="submit" data-testid="botao-registrar">Registrar despesa</button></div>
+</form>
+
+<form method="get" class="formulario" data-testid="form-filtro">
+  <label>Mês <input name="mes" inputmode="numeric" value="{{ mes }}" data-testid="filtro-mes"></label>
+  <label>Ano <input name="ano" inputmode="numeric" value="{{ ano }}" data-testid="filtro-ano"></label>
+  <label>Orçamento do mês (R$) <input name="orcamento" inputmode="decimal" value="{{ orcamento_informado }}" data-testid="campo-orcamento"></label>
+  <div class="acoes"><button type="submit" data-testid="botao-filtrar">Atualizar resumo</button></div>
+</form>
+
+<section class="resultado" data-testid="resumo-mensal">
+  <h2>Resumo de {{ '%02d' % mes }}/{{ ano }}</h2>
+  <div class="numeros">
+    <div><span>Despesas</span><strong data-testid="quantidade-despesas">{{ resumo.quantidade }}</strong></div>
+    <div><span>Total gasto</span><strong data-testid="total-gasto">{{ resumo.total | moeda }}</strong></div>
+    {% if orcamento %}
+    <div><span>Orçamento usado</span><strong data-testid="percentual-orcamento">{{ orcamento.percentual }}%</strong></div>
+    <div><span>Saldo</span><strong data-testid="saldo-orcamento">{{ orcamento.saldo | moeda }}</strong></div>
+    <div><span>Status</span><strong><span class="selo selo-{{ orcamento.status }}" data-testid="status-orcamento">{{ orcamento.status }}</span></strong></div>
+    {% endif %}
+  </div>
+  {% if resumo.por_categoria %}
+  <div class="tabela-rolagem" style="margin-top:12px">
+  <table data-testid="tabela-categorias">
+    <thead><tr><th class="texto">Categoria</th><th>Valor</th><th>% do total</th></tr></thead>
+    <tbody>
+    {% for cat, info in resumo.por_categoria.items() %}
+      <tr><td class="texto">{{ cat }}</td><td>{{ info.valor | moeda }}</td><td>{{ info.percentual }}%</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% endif %}
+</section>
+
+<h2>Lançamentos</h2>
+{% if despesas %}
+<div class="tabela-rolagem">
+<table data-testid="tabela-despesas">
+  <thead><tr><th class="texto">Data</th><th class="texto">Descrição</th><th class="texto">Categoria</th><th>Valor</th><th></th></tr></thead>
+  <tbody>
+  {% for d in despesas %}
+    <tr data-testid="linha-despesa">
+      <td class="texto">{{ d.data.strftime('%d/%m/%Y') }}</td><td class="texto">{{ d.descricao }}</td>
+      <td class="texto">{{ d.categoria }}</td><td>{{ d.valor | moeda }}</td>
+      <td><form method="post" action="{{ url_for('remover_despesa', despesa_id=d.id, ano=ano, mes=mes, orcamento=orcamento_informado or None) }}">
+        <button class="link" type="submit" data-testid="botao-remover">Remover</button></form></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="vazio" data-testid="sem-despesas">Nenhuma despesa registrada neste mês.</p>
+{% endif %}
+{% endblock %}

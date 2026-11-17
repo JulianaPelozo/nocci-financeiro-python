@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block titulo %}Empréstimo{% endblock %}
+{% block conteudo %}
+<h1>Simulador de empréstimo</h1>
+<form method="post" class="formulario" data-testid="form-emprestimo">
+  <label>Valor (R$)
+    <input name="valor" inputmode="decimal" value="{{ dados.get('valor', '') }}" data-testid="campo-valor">
+  </label>
+  <label>Taxa (% ao mês)
+    <input name="taxa" inputmode="decimal" value="{{ dados.get('taxa', '') }}" data-testid="campo-taxa">
+  </label>
+  <label>Prazo (meses)
+    <input name="prazo" inputmode="numeric" value="{{ dados.get('prazo', '') }}" data-testid="campo-prazo">
+  </label>
+  <label>Sistema
+    <select name="sistema" data-testid="campo-sistema">
+      <option value="PRICE" {{ 'selected' if dados.get('sistema') == 'PRICE' }}>PRICE (parcelas fixas)</option>
+      <option value="SAC" {{ 'selected' if dados.get('sistema') == 'SAC' }}>SAC (amortização constante)</option>
+    </select>
+  </label>
+  <label>Renda mensal (R$) — opcional
+    <input name="renda" inputmode="decimal" value="{{ dados.get('renda', '') }}" data-testid="campo-renda">
+  </label>
+  <label>Idade
+    <input name="idade" inputmode="numeric" value="{{ dados.get('idade', '') }}" data-testid="campo-idade">
+  </label>
+  <label>Nome negativado?
+    <select name="negativado" data-testid="campo-negativado">
+      <option value="nao" {{ 'selected' if dados.get('negativado') != 'sim' }}>Não</option>
+      <option value="sim" {{ 'selected' if dados.get('negativado') == 'sim' }}>Sim</option>
+    </select>
+  </label>
+  <div class="acoes"><button type="submit" data-testid="botao-simular">Simular</button></div>
+</form>
+
+{% if analise %}
+<section class="resultado" data-testid="resultado-credito">
+  <h2>Análise de crédito:
+    <span class="selo selo-{{ analise.status | replace(' ', '-') }}" data-testid="status-credito">{{ analise.status }}</span>
+  </h2>
+  <p>A primeira parcela compromete <strong data-testid="comprometimento">{{ analise.comprometimento }}%</strong> da renda.</p>
+  {% if analise.motivos %}
+  <ul data-testid="motivos-credito">{% for m in analise.motivos %}<li>{{ m }}</li>{% endfor %}</ul>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if simulacao %}
+<section class="resultado" data-testid="resultado-emprestimo">
+  <div class="numeros">
+    <div><span>Primeira parcela</span><strong data-testid="primeira-parcela">{{ simulacao.primeira_parcela | moeda }}</strong></div>
+    <div><span>Total pago</span><strong data-testid="total-pago">{{ simulacao.total_pago | moeda }}</strong></div>
+    <div><span>Total de juros</span><strong data-testid="total-juros">{{ simulacao.total_juros | moeda }}</strong></div>
+  </div>
+</section>
+<div class="tabela-rolagem">
+<table data-testid="tabela-amortizacao">
+  <thead><tr><th>Nº</th><th>Parcela</th><th>Juros</th><th>Amortização</th><th>Saldo devedor</th></tr></thead>
+  <tbody>
+  {% for p in simulacao.parcelas %}
+    <tr><td>{{ p.numero }}</td><td>{{ p.valor | moeda }}</td><td>{{ p.juros | moeda }}</td>
+        <td>{{ p.amortizacao | moeda }}</td><td>{{ p.saldo | moeda }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endif %}
+{% endblock %}

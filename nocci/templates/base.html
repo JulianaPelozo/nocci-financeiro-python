@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Nocci{% endblock %} · Nocci Financeiro</title>
+  <link rel="icon" href="{{ url_for('static', filename='logo.png') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}">
+</head>
+<body>
+  <header>
+    <a href="{{ url_for('inicio') }}"><img src="{{ url_for('static', filename='logo.png') }}" alt="Nocci"></a>
+    <nav>
+      <a href="{{ url_for('pagina_juros') }}" data-testid="menu-juros" class="{{ 'ativo' if request.endpoint == 'pagina_juros' }}">Juros</a>
+      <a href="{{ url_for('pagina_emprestimo') }}" data-testid="menu-emprestimo" class="{{ 'ativo' if request.endpoint == 'pagina_emprestimo' }}">Empréstimo</a>
+      <a href="{{ url_for('pagina_despesas') }}" data-testid="menu-despesas" class="{{ 'ativo' if request.endpoint == 'pagina_despesas' }}">Despesas</a>
+    </nav>
+  </header>
+  <main>
+    {% if erro %}<div class="alerta alerta-erro" role="alert" data-testid="mensagem-erro">{{ erro }}</div>{% endif %}
+    {% if sucesso %}<div class="alerta alerta-sucesso" role="status" data-testid="mensagem-sucesso">{{ sucesso }}</div>{% endif %}
+    {% block conteudo %}{% endblock %}
+  </main>
+  <footer>Nocci Financeiro · sistema de demonstração para a disciplina de Verificação e Validação de Software</footer>
+</body>
+</html>
